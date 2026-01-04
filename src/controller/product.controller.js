@@ -88,4 +88,42 @@ const getProduct = async (req, res) => {
     }
 }
 
-module.exports = { addProduct, allProducts, getProduct }
+const editProduct = async (req, res) => {
+    const { userId } = req.user
+    const { productId } = req.params
+    const { name, price, quantity, new_price, description, verified } = req.body;
+
+    try {
+        const userAuth = await User.findById(userId);
+        
+        if (!allowedRoles.includes(userAuth.role)) {
+            return res.status(200).json({ message: "Access denied" });
+        }
+        
+        if (userAuth.role === 'admin') {
+            const updateproduct = await Product.findByIdAndUpdate(
+             productId,
+            { 
+                name, price, quantity, new_price, description, verified
+        });
+        }
+
+        const updateproduct = await Product.findByIdAndUpdate(
+             productId,
+            { 
+                name, price, quantity, new_price, description
+        });
+
+        if (!updateproduct) {
+            return res.status(400).json({ message: "No product found" });
+        }
+
+        return res.status(200).json(updateproduct)
+
+    } catch (e) {
+        console.error(e)
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = { addProduct, allProducts, getProduct, editProduct }
