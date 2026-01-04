@@ -126,4 +126,28 @@ const editProduct = async (req, res) => {
     }
 }
 
-module.exports = { addProduct, allProducts, getProduct, editProduct }
+const searchProduct = async (req, res) => {
+    
+    const { userId } = req.user;
+    const { name } = req.query;
+    
+    try {
+        const userAuth = await User.findById(userId);
+        if (!allowedRoles.includes(userAuth.role)) {
+            return res.status(400).json({ message: "Access Denied" });
+        }
+
+        const product = await Product.findOne({ name });
+        if (!product) {
+            return res.status(400).json({ message: "No product found" });
+        }
+
+        return res.status(200).json(product);
+    } catch (e) {
+        console.error(e)
+        return res.status(500).json({ message: "Internal server error" });
+    }
+    
+}
+
+module.exports = { addProduct, allProducts, getProduct, editProduct, searchProduct }
