@@ -150,4 +150,26 @@ const searchProduct = async (req, res) => {
     
 }
 
-module.exports = { addProduct, allProducts, getProduct, editProduct, searchProduct }
+
+const deleteProduct = async (req, res) => {
+    const { userId } = req.user;
+    const { productId } = req.params;
+
+    try {
+        const userAuth = await User.findById(userId);
+        if (!allowedRoles.includes(userAuth.role)) {
+            return res.status(400).json({ message: "Access Denied" });
+        }
+
+        const product = await Product.findByIdAndDelete(productId);
+        if (!product) {
+            return res.status(400).json({ message: "Product not found" });
+        }
+
+        return res.status(200).json({ message: "Product deleted successfully" })
+    } catch (e) {
+        return res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+module.exports = { addProduct, allProducts, getProduct, editProduct, searchProduct, deleteProduct }
