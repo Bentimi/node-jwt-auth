@@ -10,7 +10,7 @@ router.get('/all-products', isAuth, allProducts);
 router.get('/get-product/:productId', isAuth, getProduct);
 router.put('/edit-product/:productId', isAuth, editProduct);
 router.get('/search-product', isAuth, searchProduct);
-router.post('/delete-product/:productId', isAuth, deleteProduct);
+router.delete('/delete-product/:productId', isAuth, deleteProduct);
 
 
 module.exports = router;

@@ -138,20 +138,17 @@ const editprofile = async (req, res) => {
 
 const deleteprofile =  async (req, res) => {
     const { userId } = req.user;
-    const { profileId } = req.params;
     try {
         const userAuth = await User.findById(userId);
 
-        if (!userAuth && userAuth.role !== "admin") {
+        if (!userAuth) {
             return res.status(403).json({ message: "Access denied" });
         }
 
-        const deletedProfile = await User.findByIdAndDelete(profileId);
+        const deletedProfile = await User.findByIdAndDelete(userId);
         if (!deletedProfile) {
             return res.status(404).json({ message: "Profile not found" });
         }
-
-
 
         return res.status(200).json({ message: "Profile deleted successfully" });
     } catch (e) {
@@ -160,4 +157,101 @@ const deleteprofile =  async (req, res) => {
     }
 }
 
-module.exports = { signup, login, getAllUsers, updateprofile, editprofile, deleteprofile };
+const deleteUser  = async (req, res) => {
+    const { userId } = req.user;
+    const { profileId } = req.params;
+
+    try {
+        const adminuser = await User.findById(userId);
+
+
+        if (adminuser.role !== "admin") {
+            return res.status(400).json({ message: "Access Denied" })
+        }
+
+        const userprofile = await User.findByIdAndDelete(profileId)
+
+        if (!userprofile) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({ message: "User deleted successfully" });
+
+
+    } catch (e) {
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+const verifyUser = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "Invalid Email" });
+        }
+
+        if (user.isVerified === true) {
+            return res.status(400).json({ message: "User is already verified" });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpexpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+        user.otp =otp;
+        user.otpExpiry = otpexpiry;
+
+        await user.save()
+
+        return res.status(200).json({ message: "OTP sent has been sent to you", otp })
+
+    } catch (e) {
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+const verifyOtp = async (req, res) => {
+    const { otp } = req.body
+
+    try {
+        
+        if (!otp) {
+            return res.status(400).json({ message: "OTP is required" })
+        }
+
+        const user =  await User.findOne({ otp });
+
+        if (!user) {
+            return res.status(404).json({ message: "Invalid OTP" });
+        }
+
+        if (user.isVerified === true) {
+            return res.status(400).json({ message: "User is already verified" });
+        }
+
+        if (user.otpExpiry < new Date()) {
+            return res.status(400).json({ message: "OTP has expired" });
+        }
+
+        user.isVerified = true;
+        user.otp = null;
+        user.otpExpiry = null;
+
+        await user.save();
+
+        return res.status(200).json({ message: "User verified" });
+
+
+    } catch (e) {
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = { signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp };
