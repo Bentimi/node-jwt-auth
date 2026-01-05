@@ -283,4 +283,92 @@ const resendOtp = async (req, res) => {
     }
 }
 
-module.exports = { signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp };
+const forgetPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ message: "user not found" });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 90000).toString();
+        const otpexpiry = new Date(Date.now() + 10 * 60 * 1000);
+        user.otp = otp;
+        user.otpExpiry = otpexpiry;
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+        user.resetPasswordToken = resetPasswordToken;
+        user.resetPasswordExpires = Date.now() + 3600000;
+
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/users/reset-password?token=${resetToken}`;
+
+        return res.status(200).json({ message: "Password reset token generated", otp, resetUrl });
+
+        
+    } catch (e) {
+
+        console.error(e)
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    const token  = req.query.token;
+    const { otp, newpassword } = req.body;
+
+    try {
+        if ((!token && !otp) || !newpassword){
+            return res.status(401).json({ message: "Reset Token and OTP are required" })
+        }
+
+        let user;
+
+        if (token) {
+            const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+            user = await User.findOne({
+                resetPasswordToken: hashedToken,
+                resetPasswordExpires: { $gt: Date.now() }
+            });
+
+            if (!user) {
+                return res.status(400).json({ message: "Invalid or expired reset token" });
+            }
+
+             if (user.otp !== otp) {
+                return res.status(400).json({ message: "Invalid or expired reset token" });
+            }
+
+        }
+
+        const hashedPassword = await bcrypt.hash(newpassword, 10);
+
+            user.password = hashedPassword;
+            user.otp = null;
+            user.otpExpiry = null;
+            user.resetPasswordExpires = null;
+            user.resetPasswordToken = null;
+
+            await user.save()
+
+        return res.status(200).json({ message: "Password reset done" })
+
+
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+
+
+}
+
+module.exports = { 
+    signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp,
+    forgetPassword, resetPassword
+ };

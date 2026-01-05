@@ -2,7 +2,10 @@ const express =  require('express');
 const router = express.Router();
 const isAuth = require('../config/auth');
 
-const { signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp } = require('../controller/user.controller');
+const { 
+     signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp,
+     forgetPassword, resetPassword
+    } = require('../controller/user.controller');
 
 router.post('/signup', signup);
 router.post('/login', login);
@@ -14,5 +17,7 @@ router.delete('/delete-user/:profileId', isAuth, deleteUser );
 router.post('/verify-user', verifyUser );
 router.put('/verify-otp', verifyOtp );
 router.post('/resend-otp', resendOtp );
+router.post('/forget-password', forgetPassword );
+router.put('/reset-password', resetPassword);
 
 module.exports = router;
