@@ -4,8 +4,9 @@ const isAuth = require('../config/auth');
 
 const { 
      signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp,
-     forgetPassword, resetPassword
+     forgetPassword, resetPassword, uploadProfilePicture
     } = require('../controller/user.controller');
+const upload = require('../config/multer');
 
 router.post('/signup', signup);
 router.post('/login', login);
@@ -19,5 +20,6 @@ router.put('/verify-otp', verifyOtp );
 router.post('/resend-otp', resendOtp );
 router.post('/forget-password', forgetPassword );
 router.put('/reset-password', resetPassword);
+router.put('/upload-profile-picture', isAuth, upload.single('profilePicture'), uploadProfilePicture);
 
 module.exports = router;

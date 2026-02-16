@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    phoneNumber: {
+        type: String,
+        unique: true
+    },
     gender: {
         type: String,
         enum: ['male', 'female', 'other'],
@@ -19,6 +23,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'staff', 'admin', 'dispatch'],
         default: 'user',
+    },
+    profile_picture: {
+        type: String,
+        default: null,
     },
     isVerified: {
         type: Boolean,

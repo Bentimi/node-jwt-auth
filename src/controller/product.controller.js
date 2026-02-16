@@ -1,6 +1,7 @@
 const Product = require("../models/product.models");
 const User = require("../models/user.models");
 require('dotenv').config();
+const cloudinary = require('../config/cloudinary');
 
 
 const allowedRoles = ['admin', 'staff'];
@@ -178,5 +179,35 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+uploadProductPicture = async (req, res) => {
+    const { userId } = req.user;
+    const { productId } = req.params;
 
-module.exports = { addProduct, allProducts, getProduct, editProduct, searchProduct, deleteProduct }
+    try {
+        const userAuth = await User.findById(userId);
+        if(!allowedRoles.includes(userAuth.role)) {
+            return res.status(400).json({ message: "Access Denied" });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(400).json({ message: "Product not found" });
+        }
+
+        const uploadImage = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'product_images',
+            public_id: `product_${productId}_image`,
+        });
+
+        product.picture = uploadImage.secure_url;
+        product.uploaded_by = userId;
+        await product.save();
+        return res.status(200).json({ message: "Product picture uploaded successfully", product });
+
+    } catch (e) {
+        return res.status(500).json({ message: "Internal server error", error: e.message });
+    }
+}
+
+
+module.exports = { addProduct, allProducts, getProduct, editProduct, searchProduct, deleteProduct, uploadProductPicture }

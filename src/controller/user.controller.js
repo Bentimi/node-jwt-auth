@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const crypto = require("crypto");
+const cloudinary = require("../config/cloudinary");
 
 
 const signup = async (req, res) => {
@@ -368,7 +369,40 @@ const resetPassword = async (req, res) => {
 
 }
 
+
+// Upload Profile Picture
+
+const uploadProfilePicture = async (req, res) => {
+
+    const { userId } = req.user;
+    try {
+        if(!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'profile_pictures',
+            public_id: `user_${userId}_profile`,
+        });
+
+        user.profile_picture = uploadResult.secure_url;
+        await user.save();
+
+        return res.status(200).json({ message: "Profile picture uploaded successfully" });
+
+    } catch (e) {
+        console.error('Error uploading profile picture', e);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 module.exports = { 
     signup, login, getAllUsers, updateprofile, editprofile, deleteprofile, deleteUser, verifyUser, verifyOtp, resendOtp,
-    forgetPassword, resetPassword
- };
+    forgetPassword, resetPassword, uploadProfilePicture
+};

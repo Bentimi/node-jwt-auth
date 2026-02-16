@@ -24,8 +24,14 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    uploaded_by: {
+    picture: {
         type: String,
+        default: null,
+    },
+    uploaded_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true,
