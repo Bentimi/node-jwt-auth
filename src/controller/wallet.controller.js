@@ -404,5 +404,5 @@ const flutterwaveWebhook = async (req, res) => {
 }
 
 module.exports = {
-    createWallet, getWallets, transferFunds, createRedirectUrl
+    createWallet, getWallets, transferFunds, createRedirectUrl, flutterwaveWebhook
 }
