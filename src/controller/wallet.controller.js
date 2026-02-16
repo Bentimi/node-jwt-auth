@@ -11,7 +11,7 @@ require('dotenv').config();
 const createWallet = async (req, res) => {
     try {
         const { userId } = req.user;
-        const { phoneNumber, currency } = req.body;
+        const { currency } = req.body;
 
         if (!userId) {
             return res.status(400).json("User Id is required");
@@ -29,15 +29,8 @@ const createWallet = async (req, res) => {
             return res.status(400).json("Wallet already exists for this user");
         }
 
-        if(!phoneNumber) {
-            return res.status(400).json("Phone number is required");
-        }
 
-
-        const normalizePhoneNummber = phoneNumber.replace(/^(\+234|0)/, '');
-
-        existingUser.phoneNumber = phoneNumber
-        await existingUser.save();
+        const normalizePhoneNummber = existingUser.phoneNumber.replace(/^(\+234|0)/, '');
         
 
         const newWallet = new Wallet ({

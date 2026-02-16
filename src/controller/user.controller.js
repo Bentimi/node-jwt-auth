@@ -7,16 +7,22 @@ const cloudinary = require("../config/cloudinary");
 
 
 const signup = async (req, res) => {
-    const { name, email, password, gender } = req.body;
+    const { name, email, password, gender, phoneNumber } = req.body;
 
     try { 
-        if (!name || !email || !password || !gender) {
+        if (!name || !email || !password || !gender || !phoneNumber) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
+        }
+
+        const existingPhoneNumber = await User.findOne({ phoneNumber: phoneNumber });
+
+        if (existingPhoneNumber) {
+            return res.status(400).json({ message: "Phone number already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,6 +32,7 @@ const signup = async (req, res) => {
             name,
             email,
             gender,
+            phoneNumber,
             password: hashedPassword,
         })
 

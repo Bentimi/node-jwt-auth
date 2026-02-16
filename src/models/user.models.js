@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     phoneNumber: {
         type: String,
         unique: true,
-        default: null,
+        // default: null,
     },
     gender: {
         type: String,
