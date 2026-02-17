@@ -7,6 +7,6 @@ router.post('/create-wallet', isAuth, createWallet);
 router.get('/get-wallets', isAuth, getWallets);
 router.put('/transfer-funds', isAuth, transferFunds);
 router.post('/create-payment-link', isAuth, createRedirectUrl);
-router.get('/flutterwave-webhook', flutterwaveWebhook);
+router.post('/flutterwave-webhook', flutterwaveWebhook);
 
 module.exports = router;
