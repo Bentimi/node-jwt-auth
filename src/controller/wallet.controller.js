@@ -288,7 +288,7 @@ const flutterwaveWebhook = async (req, res) => {
         
         
         const payload = req.body;
-        console.log("Webhook payload:", payload);
+        // console.log("Webhook payload:", payload);
 
         // START
         if(payload.event === 'charge.completed' && payload.data.status === 'successful') {
@@ -301,7 +301,7 @@ const flutterwaveWebhook = async (req, res) => {
                 }
             });
 
-            console.log("Flutterwave verification response", verifyResponse.data);
+            // console.log("Flutterwave verification response", verifyResponse.data);
 
             const verifyData = verifyResponse.data;
 
