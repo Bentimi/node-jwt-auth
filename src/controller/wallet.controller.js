@@ -306,10 +306,10 @@ const flutterwaveWebhook = async (req, res) => {
             const verifyData = verifyResponse.data;
 
             if (
-                verifyData.status !== 'success' ||
-                verifyData.data.status !== 'successful' ||
-                verifyData.data.amount !== amount ||
-                verifyData.data.currency !== currency ||
+                verifyData.status !== 'success' &&
+                verifyData.data.status !== 'successful' &&
+                verifyData.data.amount !== amount &&
+                verifyData.data.currency !== currency &&
                 verifyData.data.tx_ref !== tx_ref
             ) {
                 return res.status(400).json({ message: "Transaction verification failed" });
