@@ -303,7 +303,7 @@ const flutterwaveWebhook = async (req, res) => {
 
             console.log("Flutterwave verification response", verifyResponse.data);
 
-            const verifyData = verifyResponse.data.data;
+            const verifyData = verifyResponse.data;
 
             if (
                 verifyData.status !== 'success' ||
