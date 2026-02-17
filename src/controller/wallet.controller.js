@@ -206,10 +206,10 @@ const createRedirectUrl = async (req, res) => {
 				title: "Wallet Funding",
                 description: "Fund your wallet",
 			},
-            configurations: {
-				session_duration: 10, // Session timeout in minutes (maxValue: 1440)
-				max_retry_attempt: 5, // Max retry (int)
-			},
+            // configurations: {
+			// 	session_duration: 10, // Session timeout in minutes (maxValue: 1440)
+			// 	max_retry_attempt: 5, // Max retry (int)
+			// },
 		}
 
         const response = await axios.post(
@@ -272,6 +272,10 @@ const flutterwaveWebhook = async (req, res) => {
         const signature = req.headers["verif-hash"];
         if(!signature) return res.status(401).json({'message': 'Unauthorized Access'});
 
+        console.log("secretHash:", secretHash);
+        console.log("Received webhook with signature:", signature);
+        // console.log("Raw request body:", req.body);
+
         // const hash = crypto
         // .createHmac('sha256', secret)
         // .update(req.rawBody)
@@ -284,6 +288,9 @@ const flutterwaveWebhook = async (req, res) => {
         
         
         const payload = req.body;
+        console.log("Webhook payload:", payload);
+
+        // START
         if(payload.event === 'charge.completed' && payload.data.status === 'successful') {
             const { tx_ref, amount, currency, id: transactionId } = payload.data;
 
@@ -326,7 +333,7 @@ const flutterwaveWebhook = async (req, res) => {
                 { new: true, session }
              );
 
-             console.log("Transaction record after locking", transactionRecord);
+            //  console.log("Transaction record after locking", transactionRecord);
              
              if (!transactionRecord) {
                 await session.abortTransaction();
@@ -351,7 +358,7 @@ const flutterwaveWebhook = async (req, res) => {
                 }
              );
 
-             console.log("User Wallet Found and Updated: ", wallet);
+            //  console.log("User Wallet Found and Updated: ", wallet);
 
 
              if(wallet) {
@@ -383,6 +390,8 @@ const flutterwaveWebhook = async (req, res) => {
              }
                     
             }
+            // END
+
              // For other evevnts, just acknowledge receipt
              return res.status(200).json({ message: "Webhook received" });
              
