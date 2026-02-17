@@ -1,6 +1,7 @@
 const User = require("../models/user.models.js");
 const Wallet = require('../models/user.wallets.js');
 const Flutterwave = require('flutterwave-node-v3');
+const mongoose = require("mongoose");
 const axios = require('axios');
 const Transaction = require('../models/user.transaction.js');
 const crypto = require('crypto')
@@ -226,6 +227,7 @@ const createRedirectUrl = async (req, res) => {
         );
 
         const wallet = await Wallet.findOne({ accountNumber : accountNumber });
+        // console.log(wallet)
 
         const newTransaction = new Transaction({
             userId: userId,
@@ -261,8 +263,8 @@ const flutterwaveWebhook = async (req, res) => {
     try {
         // Verify signature
 
-        const secret = process.env.FLW_WEBHOOK_SECRET;
-        if (!secret) {
+        const secretHash = process.env.FLW_WEBHOOK_SECRET;
+        if (!secretHash) {
             console.error("FLW_WEBHOOK_SECRET not set");
             return res.status(500).json("Internal server error")
         }
@@ -270,12 +272,12 @@ const flutterwaveWebhook = async (req, res) => {
         const signature = req.headers["verif-hash"];
         if(!signature) return res.status(401).json({'message': 'Unauthorized Access'});
 
-        const hash = crypto
-        .createHmac('sha256', secret)
-        .update(req.rawBody)
-        .digest('hex');
+        // const hash = crypto
+        // .createHmac('sha256', secret)
+        // .update(req.rawBody)
+        // .digest('hex');
 
-        if((hash !== signature) || !signature) {
+        if((secretHash !== signature) || !signature) {
             console.error("Invalid Flutterwave signature");
             return res.status(401).json({'message' :'Unauthorized Access'});
         }
